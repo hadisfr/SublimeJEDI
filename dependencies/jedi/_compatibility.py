@@ -89,17 +89,12 @@ def find_module_py34(string, path=None, full_name=None, is_global_search=True):
 
 
 def find_module_py33(string, path=None, loader=None, full_name=None, is_global_search=True):
-    loader = loader or importlib.machinery.PathFinder.find_module(string, path)
+    loader = loader or importlib.machinery.PathFinder.find_spec(string, path)
 
     if loader is None and path is None:  # Fallback to find builtins
         try:
             with warnings.catch_warnings(record=True):
-                # Mute "DeprecationWarning: Use importlib.util.find_spec()
-                # instead." While we should replace that in the future, it's
-                # probably good to wait until we deprecate Python 3.3, since
-                # it was added in Python 3.4 and find_loader hasn't been
-                # removed in 3.6.
-                loader = importlib.find_loader(string)
+                loader = importlib.util.find_spec(string)
         except ValueError as e:
             # See #491. Importlib might raise a ValueError, to avoid this, we
             # just raise an ImportError to fix the issue.

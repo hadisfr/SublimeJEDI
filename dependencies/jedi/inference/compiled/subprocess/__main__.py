@@ -22,16 +22,17 @@ if sys.version_info > (3, 4):
         def __init__(self, path_dct):
             self._path_dct = path_dct
 
-        def find_module(self, fullname, path=None):
+        def find_spec(self, fullname, path, target=None):
             if path is None and fullname in self._path_dct:
                 p = self._path_dct[fullname]
-                loader = PathFinder.find_module(fullname, path=[p])
+                loader = PathFinder.find_spec(fullname, [p], target)
                 return loader
             return None
 
     # Try to import jedi/parso.
     sys.meta_path.insert(0, _ExactImporter(_get_paths()))
     from jedi.inference.compiled import subprocess  # NOQA
+    from jedi._compatibility import highest_pickle_protocol  # noqa: E402
     sys.meta_path.pop(0)
 else:
     import imp
@@ -44,9 +45,7 @@ else:
     load('parso')
     load('jedi')
     from jedi.inference.compiled import subprocess  # NOQA
-
-from jedi._compatibility import highest_pickle_protocol  # noqa: E402
-
+    from jedi._compatibility import highest_pickle_protocol  # noqa: E402
 
 # Retrieve the pickle protocol.
 host_sys_version = [int(x) for x in sys.argv[2].split('.')]
